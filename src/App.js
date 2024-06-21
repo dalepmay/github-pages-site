@@ -3,7 +3,7 @@ import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './Components/Navbar';
 import Home from './Pages/Home';
 import MTG from './Pages/MTG';
-import Ncl from './Pages/Ncl';
+import Ncl from './Pages/NCL';
 
 function App() {
   return (
