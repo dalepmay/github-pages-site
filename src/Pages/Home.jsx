@@ -1,12 +1,12 @@
 import React from 'react';
 
-function ReactComponent() {
+function Home() {
   return (
-    <div>
+    <div className="text-center">
       <h2>Welcome</h2>
       <p>This is a work in progress...</p>
     </div>
   );
 }
 
-export default ReactComponent;
+export default Home;

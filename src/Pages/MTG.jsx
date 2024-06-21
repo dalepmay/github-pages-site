@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './App.css';
+import '../App.css';
 
 function MTG() {
   const [sets, setSets] = useState([]);
@@ -22,7 +22,6 @@ function MTG() {
         const data = await response.json();
         const sortedSets = data.data.sort((a, b) => a.name.localeCompare(b.name));
         setSets([...sortedSets]);
-        // setSets([{ code: 'all-option', name: '* ALL (This can take upto 10 minutes to load!)' }, ...sortedSets]);
       } catch (error) {
         console.error('Error fetching sets:', error);
       }
@@ -69,6 +68,8 @@ function MTG() {
   async function fetchAllCardsWithSearch() {
     setLoading(true);
     let searchedCards = [];
+    let cardNames = new Set(); // Set to track card names
+    let cardIdentifiers = new Set(); // Set to track unique card identifiers
     try {
       for (let sTerm of searchTerm.split(';')) {
         sTerm = sTerm.trim();
@@ -77,7 +78,22 @@ function MTG() {
           const response = await fetch(`https://api.scryfall.com/cards/search?q=${sTerm}&unique=prints`);
           const data = await response.json();
           if (data.data) {
-            searchedCards.push(...data.data);
+            for (let card of data.data) {
+
+              // Don't add duplicate card name
+              /* if (!cardNames.has(card.name)) {
+                searchedCards.push(card);
+                cardNames.add(card.name);
+              } */
+
+              // Don't add duplicate card name & set name
+              const cardIdentifier = `${card.name}-${card.set_name}`;
+              if (!cardIdentifiers.has(cardIdentifier)) {
+                searchedCards.push(card);
+                cardIdentifiers.add(cardIdentifier);
+              }
+
+            }
           }
         }
       }
@@ -111,7 +127,7 @@ function MTG() {
       setSelectedCards([...selectedCards, card]);
     }
   }
-  
+
   function isSelected(card) {
     return selectedCards.some(selectedCard => selectedCard.id === card.id);
   }
@@ -123,7 +139,6 @@ function MTG() {
       setSelectedCards([]);
     }
   }
-  
 
   async function downloadSelectedImages(selectedCards) {
     for (const card of selectedCards) {
@@ -131,7 +146,7 @@ function MTG() {
       const cardName = card.name;
       const setName = card.set_name && card.set_name.includes(':') ? `${card.set_name.replace(':', ' - ')}` : card.set_name;
       const cardType = `${card.type_line}`;
-  
+
       try {
         const response = await fetch(imageUrl);
         const blob = await response.blob();
@@ -145,7 +160,7 @@ function MTG() {
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
-        
+
         // Add a 100ms delay between downloads
         await new Promise(resolve => setTimeout(resolve, 100));
       } catch (error) {
@@ -153,12 +168,17 @@ function MTG() {
       }
     }
   }
-  
-  
-  
 
   function handleSearchTermChange(event) {
-    setSearchTerm(event.target.value);
+    const inputValue = event.target.value;
+    setSearchTerm(inputValue);
+  }
+
+  function handlePaste(event) {
+    event.preventDefault();
+    const paste = (event.clipboardData || window.clipboardData).getData('text');
+    const processedValue = paste.split('\n').map(term => term.trim()).join(';');
+    setSearchTerm(prev => prev ? `${prev};${processedValue}` : processedValue);
   }
 
   function handleSetChange(event) {
@@ -178,46 +198,47 @@ function MTG() {
   }
 
   return (
-      <div className="App">
-        <p className="text-xl">Magic: The Gathering</p>
-        <p className="text-lg">Card List</p>
-        <p className="mt-2">Select a Deck to show, or enter card names to search for (separated by semicolons)</p>
-        <div>
-          <select
-            className="border border-gray-300 rounded"
-            value={selectedSet}
-            onChange={handleSetChange}
-          >
-            <option value="">Select a card set</option>
-            {sets.map(set => (
-              <option key={set.code} value={set.code}>
-                {set.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <input
-            size='50'
-            className="border border-gray-300 mr-2 mt-2 px-2 rounded"
-            type="text"
-            value={searchTerm}
-            onChange={handleSearchTermChange}
-            placeholder="Enter multiple search terms separated by semicolons...;"
-          />
-          <button className="bg-gray-200 border border-gray-500 px-2 rounded hover:bg-gray-300" onClick={searchCards}>Search</button>
-        </div>
-        {loading ? (
-          <div className="loading">{loadingMessage}</div>
-        ) : (
-          <div className="table-container">
-            {selectedCards.length > 0 &&
-              <button className="bg-gray-200 border border-gray-300 mb-2 px-2 rounded hover:bg-gray-300" onClick={() => downloadSelectedImages(selectedCards)}>
-                Download {selectedCards.length} Selected Images
-              </button>
-            }
-            {cards.length > 0 && (
-              <>
+    <div className="text-center">
+      <p className="text-xl">Magic: The Gathering</p>
+      <p className="text-lg">Card List</p>
+      <p className="mt-2">Select a Deck to show, or enter card names to search for (separated by semicolons)</p>
+      <div>
+        <select
+          className="border border-gray-300 rounded"
+          value={selectedSet}
+          onChange={handleSetChange}
+        >
+          <option value="">Select a card set</option>
+          {sets.map(set => (
+            <option key={set.code} value={set.code}>
+              {set.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <input
+          size='50'
+          className="border border-gray-300 mr-2 mt-2 px-2 rounded"
+          type="text"
+          value={searchTerm}
+          onChange={handleSearchTermChange}
+          onPaste={handlePaste}
+          placeholder="Enter multiple search terms separated by semicolons...;"
+        />
+        <button className="bg-gray-200 border border-gray-500 px-2 rounded hover:bg-gray-300" onClick={searchCards}>Search</button>
+      </div>
+      {loading ? (
+        <div className="loading">{loadingMessage}</div>
+      ) : (
+        <div className="table-container">
+          {selectedCards.length > 0 &&
+            <button className="bg-gray-200 border border-gray-300 mb-2 px-2 rounded hover:bg-gray-300" onClick={() => downloadSelectedImages(selectedCards)}>
+              Download {selectedCards.length} Selected Images
+            </button>
+          }
+          {cards.length > 0 && (
+            <>
               {selectedCards.length == 0 && (<p>Check items to enable downloading</p>)}
               <table className="border mx-auto">
                 <thead>
@@ -232,18 +253,24 @@ function MTG() {
                   {cards.map(card => (
                     <tr className="border divide-x divide-gray-300 odd:bg-gray-200" key={card.id}>
                       <td><input type="checkbox" checked={isSelected(card)} onChange={() => handleCheckboxChange(card)} /></td>
-                      <td><a href={card.image_uris.large} target='_blank'><img src={card.image_uris?.small} alt={card.name} width="100" /></a></td>
+                      <td>
+                        {card.image_uris?.small ? (
+                          <a href={card.image_uris.large} target='_blank'><img src={card.image_uris?.small} alt={card.name} width="100" /></a>
+                        ) : (
+                          <span>No Image</span>
+                        )}
+                      </td>
                       <td className="px-2">{card.name}</td>
                       <td className="px-2">{card.type_line}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              </>
-            )}
-          </div>
-        )}
-      </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

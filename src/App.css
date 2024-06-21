@@ -9,12 +9,6 @@ body {
   background-color: #f8f9fa;
 }
 
-.App {
-  text-align: center;
-  margin: 20px;
-  width: 100%;
-}
-
 .ag-theme-alpine {
   width: 100% !important;
   max-width: 1200px;
