@@ -168,7 +168,7 @@ const Ncl = () => {
                                 price = '$ ' + stateroom.price;
                             }
                             return (
-                                <td className={`${color} ${booked ? 'font-bold' : 'text-gray-400'} border border-black px-2 text-center`} key={index} title={totalDiff}>{price}</td>
+                                <td className={`${color} ${booked ? 'font-bold' : 'text-gray-400'} border border-black px-2 text-center`} key={index} title={totalDiff}>{price} - TotalDiff: {totalDiff}</td>
                             );
                         }
                     })}
