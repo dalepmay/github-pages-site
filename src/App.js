@@ -1,23 +1,19 @@
 import React from 'react';
 import { HashRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './Components/Navbar';
-import Home from './Pages/Home';
-import MTG from './Pages/MTG';
-import Ncl from './Pages/Ncl';
+import ReactComponent from './ReactComponent';
+import MTG from './MTG';
 
 function App() {
   return (
     <Router>
-      <Navbar />
-      <div className="mt-16">
+      <div className="App">
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/" element={<ReactComponent />} />
+          <Route path="/react" element={<ReactComponent />} />
           <Route path="/mtg" element={<MTG />} />
-          <Route path="/ncl" element={<Ncl />} />
         </Routes>
       </div>
-  </Router>
+    </Router>
   );
 }
 
