@@ -143,11 +143,13 @@ const Ncl = () => {
                     {stateroomTypes.map((type, index) => {
                         const priceI = 1220; // was 682, pricing changed to include feex/taxes (538)
                         const priceB = 1662; // was 1116, pricing changed to include feex/taxes (546)
+                        let totalDiff = 0;
                         if (type === 'Balcony' || type === 'Inside') {
                             const stateroom = itinerary.staterooms.find(s => s.title === type);
                             let price = '';
                             let color = '';
                             if (booked && stateroom.title === 'Inside' && stateroom.price !== priceI) {
+                                totalDiff += (stateroom.price - priceI);
                                 price = '*** $' + stateroom.price + ' *** (' + priceI + ')';
                                 if (stateroom.price < priceI) {
                                     color = 'text-green-700';
@@ -155,6 +157,7 @@ const Ncl = () => {
                                     color = 'text-red-700';
                                 }
                             } else if (booked && stateroom.title === 'Balcony' && stateroom.price !== priceB) {
+                                totalDiff += (stateroom.price - priceB);
                                 price = '*** $' + stateroom.price + ' *** (' + priceB + ')';
                                 if (stateroom.price < priceB) {
                                     color = 'text-green-700';
@@ -165,7 +168,7 @@ const Ncl = () => {
                                 price = '$ ' + stateroom.price;
                             }
                             return (
-                                <td className={`${color} ${booked ? 'font-bold' : 'text-gray-400'} border border-black px-2 text-center`} key={index}>{price}</td>
+                                <td className={`${color} ${booked ? 'font-bold' : 'text-gray-400'} border border-black px-2 text-center`} key={index} title={totalDiff}>{price}</td>
                             );
                         }
                     })}
